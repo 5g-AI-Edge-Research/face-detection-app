@@ -1,0 +1,46 @@
+spec:
+  template:
+    spec:
+      containers:
+        - name: face-detection-mec
+          image: docker.io/library/face-detection-backend:v1
+          imagePullPolicy: Never
+          env:
+            - name: SITE_NAME
+              value: "ran-mec"
+            - name: SIMULATED_DELAY_MS
+              value: "0"
+            - name: PORT
+              value: "5002"
+          ports:
+            - name: face-http
+              containerPort: 5002
+              protocol: TCP
+          securityContext:
+            runAsUser: 10001
+            runAsGroup: 10001
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: face-http
+            initialDelaySeconds: 4
+            periodSeconds: 5
+            timeoutSeconds: 2
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: face-http
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 2
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: "1"
+              memory: 512Mi
